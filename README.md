@@ -206,6 +206,25 @@ You should see `phi3:mini` listed. The extension connects to `http://127.0.0.1:1
 2. Click **Check Connection**
 3. Status should show: `Ollama running — Phi3 model ready`
 
+### step 6: stop 
+# Stop the container
+docker stop ollama
+
+# Verify it's stopped
+docker ps
+# to start again
+docker start ollama
+
+### to complete rome it 
+# Stop it first
+docker stop ollama
+
+# Remove the container
+docker rm ollama
+
+# Remove the Ollama image
+docker rmi ollama/ollama
+
 ---
 
 ## How to Use
