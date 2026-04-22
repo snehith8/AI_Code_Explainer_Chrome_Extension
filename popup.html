@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeLens AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 340px;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 13px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+      border-bottom: 1px solid #21262d;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #1f6feb, #58a6ff);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(31,111,235,0.3);
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #e6edf3;
+    }
+
+    .header-text p {
+      font-size: 11px;
+      color: #6e7681;
+      margin-top: 1px;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      background: #010409;
+      border-bottom: 1px solid #21262d;
+      font-size: 11px;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #3fb950;
+      box-shadow: 0 0 6px #3fb950;
+      flex-shrink: 0;
+    }
+    .status-dot.inactive { background: #6e7681; box-shadow: none; }
+
+    .content { padding: 16px 18px; display: flex; flex-direction: column; gap: 16px; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6e7681;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .input-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #c9d1d9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .input-hint { font-size: 10px; color: #484f58; font-weight: 400; }
+
+    .api-input-wrap { position: relative; }
+
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 7px;
+      color: #e6edf3;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 9px 40px 9px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: #58a6ff; box-shadow: 0 0 0 3px rgba(88,166,255,0.1); }
+
+    .toggle-vis {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6e7681;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+    }
+    .toggle-vis:hover { color: #c9d1d9; }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #1f6feb, #388bfd);
+      border: none;
+      border-radius: 7px;
+      color: white;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px;
+      transition: all 0.15s;
+      box-shadow: 0 2px 8px rgba(31,111,235,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(31,111,235,0.4); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .shortcut-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .shortcut-item {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 7px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .shortcut-label {
+      font-size: 10px;
+      color: #6e7681;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .shortcut-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #58a6ff;
+      background: rgba(88,166,255,0.1);
+      border-radius: 4px;
+      padding: 2px 6px;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      font-size: 11px;
+      color: #8b949e;
+      line-height: 1.4;
+    }
+    .tip .tip-icon { font-size: 12px; flex-shrink: 0; margin-top: 0px; }
+
+    .toast {
+      position: fixed;
+      bottom: 12px; left: 50%; transform: translateX(-50%);
+      background: #3fb950;
+      color: #0d1117;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 7px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 100;
+    }
+    .toast.error { background: #f85149; color: white; }
+    .toast.show { display: block; animation: toastIn 0.2s ease; }
+    @keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(8px); } }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #21262d;
+    }
+
+    .link-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      padding: 10px 18px;
+      border-top: 1px solid #21262d;
+    }
+    .link-row a {
+      color: #58a6ff;
+      text-decoration: none;
+      font-size: 11px;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .link-row a:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-icon">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M9 3C6.24 3 4 5.24 4 8c0 1.7.84 3.21 2.13 4.13C5.45 12.67 5 13.78 5 15h2c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2h2c0-1.22-.45-2.33-1.13-2.87C19.16 11.21 20 9.7 20 8c0-2.76-2.24-5-5-5H9z" fill="white" opacity="0.9"/>
+      <path d="M8 17h8v1a2 2 0 01-2 2h-4a2 2 0 01-2-2v-1z" fill="white" opacity="0.7"/>
+      <path d="M10 8l-2 2 2 2M14 8l2 2-2 2" stroke="#1f6feb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>AI-Code Explainer</h1>
+    <p>Powered by Ollama + Phi3:mini — Runs via Docker</p>
+  </div>
+</div>
+
+<div class="status-bar" id="status-bar">
+  <div class="status-dot inactive" id="status-dot"></div>
+  <span id="status-text">Checking Ollama connection...</span>
+</div>
+
+<div class="content">
+
+  <div>
+    <div class="section-title">Docker Setup</div>
+    <div class="tips-list">
+      <div class="tip"><span class="tip-icon">1️⃣</span>Start container: <code style="background:#161b22;padding:2px 6px;border-radius:4px;font-family:monospace">docker run -d -p 11434:11434 -e "OLLAMA_ORIGINS=*" --name ollama ollama/ollama</code></div>
+      <div class="tip"><span class="tip-icon">2️⃣</span>Pull model: <code style="background:#161b22;padding:2px 6px;border-radius:4px;font-family:monospace">docker exec ollama ollama pull phi3:mini</code></div>
+      <div class="tip"><span class="tip-icon">3️⃣</span>Make sure container is running on <strong>localhost:11434</strong></div>
+    </div>
+    <button class="btn-primary" id="check-btn" style="margin-top:10px">Check Connection</button>
+  </div>
+
+  <hr class="divider" />
+
+  <div>
+    <div class="section-title">How to Use</div>
+    <div class="shortcut-grid">
+      <div class="shortcut-item">
+        <span class="shortcut-label">Quick Explain</span>
+        <span class="shortcut-key">Ctrl+Shift+E</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="shortcut-label">Right-click Menu</span>
+        <span class="shortcut-key">Select → Menu</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="shortcut-label">Find Bugs</span>
+        <span class="shortcut-key">Right-click → 🐛</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="shortcut-label">Optimize</span>
+        <span class="shortcut-key">Right-click → ⚡</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-title">Tips</div>
+    <div class="tips-list">
+      <div class="tip"><span class="tip-icon">💡</span>Select any code on any website, then right-click or press Ctrl+Shift+E</div>
+      <div class="tip"><span class="tip-icon">🔄</span>Switch between modes in the panel to get different types of analysis</div>
+      <div class="tip"><span class="tip-icon">🖱️</span>Drag the panel anywhere on screen to reposition it</div>
+      <div class="tip"><span class="tip-icon">⎋</span>Press Escape or click ✕ to close the explanation panel</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="link-row">
+  <a href="https://hub.docker.com/r/ollama/ollama" target="_blank">Ollama on Docker Hub</a>
+  <a href="https://ollama.com/library/phi3" target="_blank">Phi3:mini Model</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
